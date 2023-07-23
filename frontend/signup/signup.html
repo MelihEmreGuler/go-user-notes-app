@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Note Taking App - Sign Up</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<div class="container">
+    <div class="side-panel">
+        <h2>Welcome to Note Taking App</h2>
+        <p>
+            <strong>Experience the world of efficiency and organization with the Note Taking App!</strong><br>
+            This innovative application is designed to simplify your life by providing a seamless note-taking experience, empowering you to capture your ideas effortlessly, wherever you go.
+        </p>
+    </div>
+    <div class="form-panel">
+        <form id="signup-form">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" required>
+
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
+
+            <label for="confirm-password">Confirm Password</label>
+            <input type="password" id="confirm-password" name="confirm-password" required>
+
+            <div class="consent-container">
+                <input type="checkbox" id="consent-checkbox" required>
+                <label for="consent-checkbox">I have read and agree to the <a href="#" id="consent-link">consent statement</a>.</label>
+            </div>
+
+            <button type="submit">Get Started</button>
+        </form>
+        <p>Already have an account? <a href="../login/login.html">Log in here</a></p>
+    </div>
+</div>
+<div class="popup-card" id="consent-popup">
+    <div class="popup-content">
+        <span class="close-btn" id="close-popup">&times;</span>
+        <h3>Consent Statement</h3>
+        <p>
+            By checking the box above and submitting this form, you acknowledge that the Note Taking App securely stores your personal registration information and notes in an encrypted format. Your data will be treated with the utmost confidentiality and will not be shared with third parties without your explicit consent.
+        </p>
+    </div>
+</div>
+<script src="signup-script.js"></script>
+</body>
+</html>
