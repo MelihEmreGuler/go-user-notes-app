@@ -28,7 +28,8 @@ func CreateUser(c *fiber.Ctx) error {
 		return err
 	}
 
-	return c.JSON(fiber.Map{
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": true, // Add this line to indicate successful registration
 		"message": "user created",
 	})
 }
