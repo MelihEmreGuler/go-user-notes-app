@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/MelihEmreGuler/go-user-notes-app/database"
-	"github.com/MelihEmreGuler/go-user-notes-app/middleware"
+	"github.com/MelihEmreGuler/go-user-notes-app/middleware/session"
 	"github.com/MelihEmreGuler/go-user-notes-app/routes"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -14,6 +14,9 @@ func main() {
 	// initialize the database
 	database.Init()
 
+	// Postgres Storage for sessions
+	session.InitSession()
+
 	// call the New() method - used to instantiate a new Fiber App
 	app := fiber.New()
 
@@ -24,9 +27,6 @@ func main() {
 		AllowMethods:     "GET,POST,HEAD,PUT,DELETE,PATCH,OPTIONS",
 		AllowCredentials: true,
 	}))
-
-	// Postgres Storage for sessions
-	middleware.InitConfig()
 
 	// Setup routes
 	routes.Routes(app)

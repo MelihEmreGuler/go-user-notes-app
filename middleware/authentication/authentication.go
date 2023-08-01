@@ -10,6 +10,64 @@ import (
 	"strings"
 )
 
+// SignUp signs up the user
+func SignUp(username, email, password string) error {
+
+	//checks if the username is valid
+	if valid, err := usernameValid(username); !valid {
+		return err
+	}
+	//checks if the email is valid
+	if valid, err := emailValid(email); !valid {
+		return err
+	}
+
+	//hashes the password
+	hashedPassword := hashPassword(password)
+
+	//inserts the user to the database
+	return repository.R.InsertUser(username, email, hashedPassword)
+}
+
+// SignIn signs in the user with username or email
+func SignIn(usernameOrEmail, password string) (*models.User, error) {
+
+	var user *models.User
+	var err error
+	isUsername := true
+
+	//checks if the usernameOrEmail is email
+	if strings.Contains(usernameOrEmail, "@") {
+		isUsername = false
+	}
+
+	//brings the user from the database
+	if isUsername {
+		user, err = repository.R.SelectUserByUsername(usernameOrEmail)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		user, err = repository.R.SelectUserByEmail(usernameOrEmail)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	//checks if the user exists
+	if user == nil {
+		return user, errors.New("user does not exist")
+	}
+
+	//checks if the password is correct
+	if checkPassword(password, user.PasswordHash) {
+		fmt.Println("password is correct for user: " + usernameOrEmail)
+		return user, nil // password is correct
+	} else {
+		return user, errors.New(usernameOrEmail + " password is incorrect")
+	}
+}
+
 // hashPassword hashes the password using sha256
 func hashPassword(password string) string {
 	hashed := sha256.Sum256([]byte(password))
@@ -78,55 +136,4 @@ func emailValid(email string) (bool, error) {
 	}
 
 	return true, nil
-}
-
-// SignUp signs up the user
-func SignUp(username, email, password string) error {
-
-	//checks if the username is valid
-	if valid, err := usernameValid(username); !valid {
-		return err
-	}
-	//checks if the email is valid
-	if valid, err := emailValid(email); !valid {
-		return err
-	}
-
-	//hashes the password
-	hashedPassword := hashPassword(password)
-
-	//inserts the user to the database
-	return repository.UserRepository.Insert(username, email, hashedPassword)
-}
-
-// SignIn signs in the user with username or email
-func SignIn(usernameOrEmail, password string) (*models.User, error) {
-
-	var user *models.User
-	isUsername := true
-
-	//checks if the usernameOrEmail is email
-	if strings.Contains(usernameOrEmail, "@") {
-		isUsername = false
-	}
-
-	//brings the user from the database
-	if isUsername {
-		user = repository.UserRepository.SelectByUsername(usernameOrEmail)
-	} else {
-		user = repository.UserRepository.SelectByEmail(usernameOrEmail)
-	}
-
-	//checks if the user exists
-	if user == nil {
-		return user, errors.New("user does not exist")
-	}
-
-	//checks if the password is correct
-	if checkPassword(password, user.PasswordHash) {
-		fmt.Println("password is correct for user: " + usernameOrEmail)
-		return user, nil // password is correct
-	} else {
-		return user, errors.New(usernameOrEmail + " password is incorrect")
-	}
 }
