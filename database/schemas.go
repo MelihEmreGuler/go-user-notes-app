@@ -7,6 +7,7 @@ import (
 func CreateTables() {
 	createUsersTable()
 	createNoteTable()
+	creatSessionsTable()
 }
 
 // CreateUsersTable func to create users table ---
@@ -36,6 +37,22 @@ func createNoteTable() {
     content TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT NOW()
 );`))
+
+	if err != nil {
+		fmt.Printf("Error executing SQL query: %v\n", err)
+	}
+}
+
+func creatSessionsTable() {
+
+	_, err := DB.Exec(`CREATE TABLE IF NOT EXISTS sessions (
+    session_id UUID PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    login_time TIMESTAMP WITH TIME ZONE NOT NULL,
+    last_event TIMESTAMP WITH TIME ZONE NOT NULL,
+    ip_address INET NOT NULL,
+    user_agent TEXT NOT NULL
+);`)
 
 	if err != nil {
 		fmt.Printf("Error executing SQL query: %v\n", err)
