@@ -1,24 +1,11 @@
 package repository
 
 import (
-	"database/sql"
 	"errors"
 	"fmt"
 	"github.com/MelihEmreGuler/go-user-notes-app/models"
 	"github.com/google/uuid"
 )
-
-type UserRepo struct {
-	db *sql.DB
-}
-
-var UserRepository = &UserRepo{}
-
-func NewRepo(db *sql.DB) {
-	UserRepository = &UserRepo{
-		db: db,
-	}
-}
 
 /*
 	Create -> Insert
@@ -27,8 +14,8 @@ func NewRepo(db *sql.DB) {
 	Delete -> Delete
 */
 
-// Insert user to database table users (username, email ,hashed_password)
-func (repo UserRepo) Insert(username string, email string, hashedPassword string) error {
+// InsertUser user to database table users (username, email ,hashed_password)
+func (repo *Repo) InsertUser(username string, email string, hashedPassword string) error {
 
 	// Generate uuid for user_id
 	userId := uuid.New().String()
@@ -65,54 +52,71 @@ func (repo UserRepo) Insert(username string, email string, hashedPassword string
 	}
 }
 
-func (repo UserRepo) SelectByUsername(username string) *models.User {
+func (repo *Repo) SelectUserByUsername(username string) (*models.User, error) {
 	var user models.User
 
 	stmt, err := repo.db.Prepare("select user_id, email, password_hash from users where username = $1")
 	if err != nil {
-		fmt.Println("statement prepare error:", err)
-		return nil
+		return nil, errors.New("statement prepare error" + err.Error())
 	}
 
 	rows, err := stmt.Query(username)
 	if err != nil {
-		fmt.Println("statement query error:", err)
-		return nil
+		return nil, errors.New("statement query error" + err.Error())
 	}
 
 	for rows.Next() {
 		err = rows.Scan(&user.ID, &user.Email, &user.PasswordHash)
 		if err != nil {
-			fmt.Println("rows scan error:", err)
-			return nil
+			return nil, errors.New("rows scan error" + err.Error())
 		}
 	}
 
-	return &user
+	return &user, nil
 }
 
-func (repo UserRepo) SelectByEmail(email string) *models.User {
+func (repo *Repo) SelectUserByEmail(email string) (*models.User, error) {
 	var user models.User
 
 	stmt, err := repo.db.Prepare("select user_id, username, password_hash from users where email = $1")
 	if err != nil {
-		fmt.Println("statement prepare error:", err)
-		return nil
+		return nil, errors.New("statement prepare error" + err.Error())
 	}
 
 	rows, err := stmt.Query(email)
 	if err != nil {
-		fmt.Println("statement query error:", err)
-		return nil
+		return nil, errors.New("statement query error" + err.Error())
 	}
 
 	for rows.Next() {
 		err = rows.Scan(&user.ID, &user.Username, &user.PasswordHash)
 		if err != nil {
-			fmt.Println("rows scan error:", err)
-			return nil
+			return nil, errors.New("rows scan error" + err.Error())
 		}
 	}
 
-	return &user
+	return &user, nil
+}
+
+func (repo *Repo) SelectUserById(userId string) (*models.User, error) {
+	var user models.User
+
+	stmt, err := repo.db.Prepare("select username, email, password_hash from users where user_id = $1")
+	if err != nil {
+		return nil, fmt.Errorf("statement prepare error: %w", err)
+	}
+
+	rows, err := stmt.Query(userId)
+	if err != nil {
+		return nil, fmt.Errorf("statement query error: %w", err)
+	}
+
+	for rows.Next() {
+		err = rows.Scan(&user.Username, &user.Email, &user.PasswordHash)
+		if err != nil {
+			return nil, fmt.Errorf("rows scan error: %w", err)
+		}
+	}
+
+	return &user, nil
 }
