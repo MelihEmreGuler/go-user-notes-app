@@ -1,4 +1,4 @@
-package middleware
+package authentication
 
 import (
 	"crypto/sha256"
