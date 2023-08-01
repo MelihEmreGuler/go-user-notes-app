@@ -1,7 +1,8 @@
 package handlers
 
 import (
-	"github.com/MelihEmreGuler/go-user-notes-app/middleware"
+	"github.com/MelihEmreGuler/go-user-notes-app/middleware/authentication"
+	"github.com/MelihEmreGuler/go-user-notes-app/middleware/session"
 	"github.com/MelihEmreGuler/go-user-notes-app/models"
 	"github.com/gofiber/fiber/v2"
 )
@@ -24,7 +25,7 @@ func CreateUser(c *fiber.Ctx) error {
 	if err := c.BodyParser(request); err != nil {
 		return err
 	}
-	if err := middleware.SignUp(request.Username, request.Email, request.Password); err != nil {
+	if err := authentication.SignUp(request.Username, request.Email, request.Password); err != nil {
 		return err
 	}
 
@@ -40,6 +41,7 @@ func CreateUser(c *fiber.Ctx) error {
 }' localhost:8080/login -v
 */
 
+// SignIn signs in a user
 func SignIn(c *fiber.Ctx) error {
 	var user *models.User
 	var err error
@@ -54,28 +56,28 @@ func SignIn(c *fiber.Ctx) error {
 	}
 
 	// sign in user
-	if user, err = middleware.SignIn(request.UsernameOrEmail, request.Password); err != nil {
+	if user, err = authentication.SignIn(request.UsernameOrEmail, request.Password); err != nil {
 		return err
 	}
 
-	// Create session and store in storage
-	if err = middleware.CreateSession(middleware.Store, c, user.ID); err != nil {
+	// Create session and store in database
+	if err = session.CreateSession(c, user.ID); err != nil {
 		return err
 	}
 
-	return c.JSON(fiber.Map{
-		"message": "user logged in",
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": true, // Add this line to indicate successful login
 	})
 }
 
-func GetSessionValue(c *fiber.Ctx) error {
-	// Get session from storage
-	value, err := middleware.GetSession(c)
-	if err != nil {
+// SignOut signs out a user
+func SignOut(c *fiber.Ctx) error {
+	// Delete session from storage
+	if err := session.DeleteSession(c); err != nil {
 		return err
 	}
 
-	return c.JSON(fiber.Map{
-		"message": value,
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": true, // Add this line to indicate successful logout
 	})
 }
