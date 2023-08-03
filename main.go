@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/MelihEmreGuler/go-user-notes-app/database"
+	_ "github.com/MelihEmreGuler/go-user-notes-app/docs"
 	"github.com/MelihEmreGuler/go-user-notes-app/middleware/session"
 	"github.com/MelihEmreGuler/go-user-notes-app/routes"
 	"github.com/gofiber/fiber/v2"
