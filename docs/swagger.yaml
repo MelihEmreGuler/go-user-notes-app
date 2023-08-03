@@ -1,0 +1,343 @@
+definitions:
+  handlers.createNoteRequest:
+    properties:
+      content:
+        type: string
+      title:
+        type: string
+    type: object
+  handlers.createUserRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  handlers.signInRequest:
+    properties:
+      password:
+        type: string
+      username_or_email:
+        type: string
+    type: object
+  handlers.updateEmailRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  handlers.updateNoteRequest:
+    properties:
+      content:
+        type: string
+      title:
+        type: string
+    type: object
+  handlers.updatePasswordRequest:
+    properties:
+      new_password:
+        type: string
+      old_password:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Sign in a user with the given username/email and password
+      parameters:
+      - description: User Login Information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.signInRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Sign in a user
+      tags:
+      - Users
+  /logout:
+    post:
+      consumes:
+      - application/json
+      description: Sign out the currently logged-in user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Sign out a user
+      tags:
+      - Users
+  /note:
+    post:
+      consumes:
+      - application/json
+      description: Create a new note with the given title and content
+      parameters:
+      - description: Note Information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.createNoteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Create a new note
+      tags:
+      - Notes
+  /note/:id:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a note of the user with the given id
+      parameters:
+      - description: Note ID
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Delete a note
+      tags:
+      - Notes
+    get:
+      consumes:
+      - application/json
+      description: Get a note of the user with the given id
+      parameters:
+      - description: Note ID
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get a note
+      tags:
+      - Notes
+    put:
+      consumes:
+      - application/json
+      description: Update a note of the user with the given id
+      parameters:
+      - description: Note ID
+        in: query
+        name: id
+        required: true
+        type: string
+      - description: Note Information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.updateNoteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update a note
+      tags:
+      - Notes
+  /notes:
+    get:
+      consumes:
+      - application/json
+      description: Get all notes of the user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get all notes
+      tags:
+      - Notes
+  /signup:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user with the given username, email, and password
+      parameters:
+      - description: User Information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.createUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Create a new user
+      tags:
+      - Users
+  /user:
+    delete:
+      consumes:
+      - application/json
+      description: Delete the currently logged-in user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a user
+      tags:
+      - Users
+  /user/email:
+    put:
+      consumes:
+      - application/json
+      description: Update the email of the currently logged-in user
+      parameters:
+      - description: User Email Information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.updateEmailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update the email of a user
+      tags:
+      - Users
+  /user/password:
+    put:
+      consumes:
+      - application/json
+      description: Update the password of the currently logged-in user
+      parameters:
+      - description: User Password Information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.updatePasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update the password of a user
+      tags:
+      - Users
+swagger: "2.0"
