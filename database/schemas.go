@@ -35,7 +35,7 @@ func createNoteTable() {
 	user_id UUID REFERENCES users(user_id) ON DELETE CASCADE,
     title VARCHAR(100) NOT NULL,
     content TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );`))
 
 	if err != nil {
