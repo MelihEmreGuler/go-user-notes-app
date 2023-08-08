@@ -42,6 +42,7 @@ func (repo *Repo) InsertUser(username string, email string, hashedPassword strin
 
 func (repo *Repo) SelectUserByUsername(username string) (*models.User, error) {
 	var user models.User
+	user.Username = username
 
 	stmt, err := repo.db.Prepare("SELECT user_id, email, password_hash FROM users WHERE username = $1")
 	if err != nil {
@@ -66,6 +67,7 @@ func (repo *Repo) SelectUserByUsername(username string) (*models.User, error) {
 // SelectUserByEmail selects user from database table users by email
 func (repo *Repo) SelectUserByEmail(email string) (*models.User, error) {
 	var user models.User
+	user.Email = email
 
 	stmt, err := repo.db.Prepare("SELECT user_id, username, password_hash FROM users WHERE email = $1")
 	if err != nil {
