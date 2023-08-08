@@ -139,13 +139,23 @@ func UpdatePassword(c *fiber.Ctx) error {
 	}
 
 	// Get user from session
-	user, err := session.AuthenticateAndRefresh(c)
+	sess, err := session.AuthenticateAndRefresh(c)
 	if err != nil {
 		return err
 	}
 
+	user, err := repository.R.SelectUserById(sess.UserID)
+	if err != nil {
+		return err
+	} else if user == nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "user not found",
+		})
+	}
+
 	// Update password
-	if err = authentication.UpdatePassword(user.ID, request.OldPassword, request.NewPassword); err != nil {
+	if err = authentication.UpdatePassword(user.Username, request.OldPassword, request.NewPassword); err != nil {
 		return err
 	}
 
@@ -173,13 +183,13 @@ func UpdateEmail(c *fiber.Ctx) error {
 	}
 
 	// Get user from session
-	user, err := session.AuthenticateAndRefresh(c)
+	sess, err := session.AuthenticateAndRefresh(c)
 	if err != nil {
 		return err
 	}
 
 	// Update email
-	if err = authentication.UpdateEmail(user.ID, request.Password, request.Email); err != nil {
+	if err = authentication.UpdateEmail(sess.UserID, request.Password, request.Email); err != nil {
 		return err
 	}
 
@@ -200,14 +210,14 @@ func UpdateEmail(c *fiber.Ctx) error {
 // @Router /user [delete]
 func DeleteUser(c *fiber.Ctx) error {
 	// Get user from session
-	user, err := session.AuthenticateAndRefresh(c)
+	sess, err := session.AuthenticateAndRefresh(c)
 
 	// Delete session from storage
 	if err = session.DeleteSession(c); err != nil {
 		return err
 	}
 	// Delete user from database
-	if err = repository.R.DeleteUser(user.ID); err != nil {
+	if err = repository.R.DeleteUser(sess.UserID); err != nil {
 		return err
 	}
 
