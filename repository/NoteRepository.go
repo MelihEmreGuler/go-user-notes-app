@@ -36,6 +36,7 @@ func (repo *Repo) GetNotes(userId string) ([]models.Note, error) {
 
 	for rows.Next() {
 		var note models.Note
+		note.UserId = userId
 		err = rows.Scan(&note.ID, &note.Title, &note.Content, &note.CreatedAt)
 		if err != nil {
 			return nil, fmt.Errorf("scan error: %w", err)
