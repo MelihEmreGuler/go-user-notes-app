@@ -143,6 +143,15 @@ func GetNote(c *fiber.Ctx) error {
 		return fmt.Errorf("error while getting note: %w", err)
 	}
 
+	if note == nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "note not found",
+		})
+	}
+
+	// Set the user id to the note
+	note.UserId = sess.UserID
+
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"note":    note,
