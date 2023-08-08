@@ -69,28 +69,15 @@ func SignIn(usernameOrEmail, password string) (*models.User, error) {
 }
 
 // UpdatePassword updates the password of the user
-func UpdatePassword(usernameOrEmail, oldPassword, newPassword string) error {
+func UpdatePassword(username, oldPassword, newPassword string) error {
 
 	var user *models.User
 	var err error
-	isUsername := true
-
-	//checks if the usernameOrEmail is email
-	if strings.Contains(usernameOrEmail, "@") {
-		isUsername = false
-	}
 
 	//brings the user from the database
-	if isUsername {
-		user, err = repository.R.SelectUserByUsername(usernameOrEmail)
-		if err != nil {
-			return err
-		}
-	} else {
-		user, err = repository.R.SelectUserByEmail(usernameOrEmail)
-		if err != nil {
-			return err
-		}
+	user, err = repository.R.SelectUserByUsername(username)
+	if err != nil {
+		return err
 	}
 
 	//checks if the user exists
@@ -100,7 +87,7 @@ func UpdatePassword(usernameOrEmail, oldPassword, newPassword string) error {
 
 	//checks if the password is correct
 	if checkPassword(oldPassword, user.PasswordHash) {
-		fmt.Println("old password is correct for user: " + usernameOrEmail)
+		fmt.Println("old password is correct for user: " + username)
 
 		//hashes the new password
 		hashedNewPassword := hashPassword(newPassword)
@@ -108,7 +95,7 @@ func UpdatePassword(usernameOrEmail, oldPassword, newPassword string) error {
 		//updates the password of the user
 		return repository.R.UpdateUserPassword(user.ID, hashedNewPassword)
 	} else {
-		return errors.New(usernameOrEmail + " password is incorrect")
+		return errors.New(username + " password is incorrect")
 	}
 }
 
