@@ -6,6 +6,7 @@ import (
 	"github.com/MelihEmreGuler/go-user-notes-app/models"
 	"github.com/MelihEmreGuler/go-user-notes-app/repository"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 type createUserRequest struct {
@@ -24,6 +25,9 @@ type updatePasswordRequest struct {
 type updateEmailRequest struct {
 	Password string `json:"password"`
 	Email    string `json:"email"`
+}
+type signOutRequest struct {
+	SessionID string `json:"session_id"`
 }
 
 /*curl -X POST -H "Content-Type: application/json" -d '{
@@ -55,7 +59,7 @@ func CreateUser(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true, // Add this line to indicate successful registration
-		"message": "user created",
+		"message": "User Created",
 	})
 }
 
@@ -89,13 +93,16 @@ func SignIn(c *fiber.Ctx) error {
 		return err
 	}
 
+	sessionID := uuid.New().String()
 	// Create session and store in database
-	if err = session.CreateSession(c, user.ID); err != nil {
+	if err = session.CreateSession(c, user.ID, sessionID); err != nil {
 		return err
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"success": true, // Add this line to indicate successful login
+		"success":    true, // Add this line to indicate successful login
+		"message":    "User successfully logged in",
+		"session_id": sessionID,
 	})
 }
 
@@ -109,14 +116,21 @@ func SignIn(c *fiber.Ctx) error {
 // @Failure 400 {object} map[string]interface{}
 // @Router /logout [post]
 func SignOut(c *fiber.Ctx) error {
+
+	request := &signOutRequest{}
+	if err := c.BodyParser(request); err != nil {
+		return err
+	}
+
 	c.ClearCookie("session_id")
 	// Delete session from storage
-	if err := session.DeleteSession(c); err != nil {
+	if err := session.DeleteSession(c, request.SessionID); err != nil {
 		return err
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true, // Add this line to indicate successful logout
+		"message": "User logged out",
 	})
 }
 
@@ -134,6 +148,7 @@ func SignOut(c *fiber.Ctx) error {
 func UpdatePassword(c *fiber.Ctx) error {
 
 	request := &updatePasswordRequest{}
+
 	if err := c.BodyParser(request); err != nil {
 		return err
 	}
@@ -150,7 +165,7 @@ func UpdatePassword(c *fiber.Ctx) error {
 	} else if user == nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
-			"message": "user not found",
+			"message": "User not found",
 		})
 	}
 
@@ -161,6 +176,7 @@ func UpdatePassword(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true, // Add this line to indicate successful password update
+		"message": "Password successfully updated",
 	})
 }
 
@@ -195,6 +211,7 @@ func UpdateEmail(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true, // Add this line to indicate successful email update
+		"message": "Email successfully updated",
 	})
 }
 
@@ -213,9 +230,9 @@ func DeleteUser(c *fiber.Ctx) error {
 	sess, err := session.AuthenticateAndRefresh(c)
 
 	// Delete session from storage
-	if err = session.DeleteSession(c); err != nil {
+	if err = session.DeleteSession(c, "21323323"); err != nil {
 		return err
-	}
+	} // GECİCİ STRİNG VAR !!
 	// Delete user from database
 	if err = repository.R.DeleteUser(sess.UserID); err != nil {
 		return err
@@ -223,5 +240,6 @@ func DeleteUser(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true, // Add this line to indicate successful logout
+		"message": "User successfully deleted",
 	})
 }

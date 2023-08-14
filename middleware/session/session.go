@@ -6,7 +6,6 @@ import (
 	"github.com/MelihEmreGuler/go-user-notes-app/models"
 	"github.com/MelihEmreGuler/go-user-notes-app/repository"
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 	"time"
 )
 
@@ -15,9 +14,7 @@ func InitSession() {
 }
 
 // CreateSession creates a new session and stores it in the database and sends the session ID to the user's computer
-func CreateSession(c *fiber.Ctx, userID string) error {
-	//generate uuid for session_id
-	sessionID := uuid.New().String()
+func CreateSession(c *fiber.Ctx, userID string, sessionID string) error {
 
 	// Insert session to database
 	if err := repository.R.InsertSession(sessionID, userID, c.IP(), c.Get("User-Agent")); err != nil {
@@ -50,9 +47,9 @@ func AuthenticateAndRefresh(c *fiber.Ctx) (*models.Session, error) {
 }
 
 // DeleteSession deletes the session from database and invalidates the session ID cookie on the user's computer
-func DeleteSession(c *fiber.Ctx) error {
-	// Read the session ID from the cookie stored on the user's computer
-	sessionID := cookie.GetSessionCookie(c)
+func DeleteSession(c *fiber.Ctx, sessionID string) error {
+
+	fmt.Println("session_id: ", sessionID)
 
 	// Delete session from database
 	if err := repository.R.DeleteSession(sessionID); err != nil {

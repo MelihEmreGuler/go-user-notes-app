@@ -3,18 +3,22 @@ package handlers
 import (
 	"fmt"
 	"github.com/MelihEmreGuler/go-user-notes-app/middleware/session"
-	"github.com/MelihEmreGuler/go-user-notes-app/models"
 	"github.com/MelihEmreGuler/go-user-notes-app/repository"
 	"github.com/gofiber/fiber/v2"
 )
 
 type createNoteRequest struct {
-	Title   string `json:"title"`
-	Content string `json:"content"`
+	Title     string `json:"title"`
+	Content   string `json:"content"`
+	SessionID string `json:"session_id"`
 }
 type updateNoteRequest struct {
-	Title   string `json:"title"`
-	Content string `json:"content"`
+	Title     string `json:"title"`
+	Content   string `json:"content"`
+	SessionID string `json:"session_id"`
+}
+type deleteNoteRequest struct {
+	SessionID string `json:"session_id"`
 }
 
 // checkSession checks if the user is logged in and sets the session information to the context
@@ -55,30 +59,37 @@ curl -X POST http://localhost:8080/note \
 func CreateNote(c *fiber.Ctx) error {
 
 	// Checks if the user is logged in
-	if err := checkSession(c); err != nil {
-		return err
-	}
+	// if err := checkSession(c); err != nil {
+	//	return err
+	// }
 
 	// Get the session information from the context
-	sess, ok := c.Locals("session").(*models.Session)
-	if !ok {
-		return fmt.Errorf("session not found")
-	}
+	//sess, ok := c.Locals("session").(*models.Session)
+	// if !ok {
+	//	return fmt.Errorf("session not found")
+	// }
 
 	request := &createNoteRequest{}
 	if err := c.BodyParser(request); err != nil {
 		return fmt.Errorf("error while parsing request body: %w", err)
 	}
 
+	sessionID := request.SessionID
+
+	sess, err := repository.R.SelectSession(sessionID)
+	if err != nil {
+		return fmt.Errorf("error while selecting session: %w", err)
+	}
+
 	// Insert note to database
-	err := repository.R.InsertNote(sess.UserID, request.Title, request.Content)
+	err = repository.R.InsertNote(sess.UserID, request.Title, request.Content)
 	if err != nil {
 		return fmt.Errorf("error while inserting note: %w", err)
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
-		"message": "note created",
+		"message": "Note created",
 	})
 }
 
@@ -93,15 +104,11 @@ func CreateNote(c *fiber.Ctx) error {
 // @Router /notes [get]
 func GetNotes(c *fiber.Ctx) error {
 
-	// Checks if the user is logged in
-	if err := checkSession(c); err != nil {
-		return err
-	}
+	sessionID := c.Get("session_id")
 
-	// Get the session information from the context
-	sess, ok := c.Locals("session").(*models.Session)
-	if !ok {
-		return fmt.Errorf("session not found")
+	sess, err := repository.R.SelectSession(sessionID)
+	if err != nil {
+		return fmt.Errorf("error while selecting session: %w", err)
 	}
 
 	// Get notes from database
@@ -127,15 +134,12 @@ func GetNotes(c *fiber.Ctx) error {
 // @Failure 400 {object} map[string]interface{}
 // @Router /note/:id [get]
 func GetNote(c *fiber.Ctx) error {
-	// Checks if the user is logged in
-	if err := checkSession(c); err != nil {
-		return err
-	}
 
-	// Get the session information from the context
-	sess, ok := c.Locals("session").(*models.Session)
-	if !ok {
-		return fmt.Errorf("session not found")
+	sessionID := c.Get("session_id")
+
+	sess, err := repository.R.SelectSession(sessionID)
+	if err != nil {
+		return fmt.Errorf("error while selecting session: %w", err)
 	}
 
 	note, err := repository.R.GetNoteByID(sess.UserID, c.Query("id"))
@@ -170,30 +174,27 @@ func GetNote(c *fiber.Ctx) error {
 // @Failure 400 {object} map[string]interface{}
 // @Router /note/:id [put]
 func UpdateNote(c *fiber.Ctx) error {
-	// Checks if the user is logged in
-	if err := checkSession(c); err != nil {
-		return err
-	}
-
-	// Get the session information from the context
-	sess, ok := c.Locals("session").(*models.Session)
-	if !ok {
-		return fmt.Errorf("session not found")
-	}
 
 	request := &updateNoteRequest{}
 	if err := c.BodyParser(request); err != nil {
 		return fmt.Errorf("error while parsing request body: %w", err)
 	}
 
-	err := repository.R.UpdateNoteByID(sess.UserID, c.Query("id"), request.Title, request.Content)
+	sessionID := request.SessionID
+
+	sess, err := repository.R.SelectSession(sessionID)
+	if err != nil {
+		return fmt.Errorf("error while selecting session: %w", err)
+	}
+
+	err = repository.R.UpdateNoteByID(sess.UserID, c.Query("id"), request.Title, request.Content)
 	if err != nil {
 		return fmt.Errorf("error while updating note: %w", err)
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
-		"message": "note updated",
+		"message": "Note updated",
 	})
 }
 
@@ -208,18 +209,22 @@ func UpdateNote(c *fiber.Ctx) error {
 // @Failure 400 {object} map[string]interface{}
 // @Router /note/:id [delete]
 func DeleteNote(c *fiber.Ctx) error {
-	// Checks if the user is logged in
-	if err := checkSession(c); err != nil {
-		return err
+
+	fmt.Println("note_id: ", c.Query("id"))
+
+	request := &deleteNoteRequest{}
+	if err := c.BodyParser(request); err != nil {
+		return fmt.Errorf("error while parsing request body: %w", err)
 	}
 
-	// Get the session information from the context
-	sess, ok := c.Locals("session").(*models.Session)
-	if !ok {
-		return fmt.Errorf("session not found")
+	sessionID := request.SessionID
+
+	sess, err := repository.R.SelectSession(sessionID)
+	if err != nil {
+		return fmt.Errorf("error while selecting session: %w", err)
 	}
 
-	err := repository.R.DeleteNoteByID(sess.UserID, c.Query("id"))
+	err = repository.R.DeleteNoteByID(sess.UserID, c.Query("id"))
 	if err != nil {
 		return fmt.Errorf("error while deleting note: %w", err)
 	}
