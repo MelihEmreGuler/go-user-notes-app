@@ -113,6 +113,7 @@ func SignIn(c *fiber.Ctx) error {
 // @Tags Users
 // @Accept json
 // @Produce json
+// @Param request body signOutRequest true "User Logout Information"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
 // @Router /logout [post]
