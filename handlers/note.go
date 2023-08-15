@@ -99,6 +99,7 @@ func CreateNote(c *fiber.Ctx) error {
 // @Tags Notes
 // @Accept json
 // @Produce json
+// @Param session_id header string true "Session ID"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
 // @Router /notes [get]
@@ -130,6 +131,7 @@ func GetNotes(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Param id query string true "Note ID"
+// @Param session_id header string true "Session ID"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
 // @Router /note/:id [get]
@@ -205,12 +207,11 @@ func UpdateNote(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Param id query string true "Note ID"
+// @Param request body deleteNoteRequest true "Note Information"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
 // @Router /note/:id [delete]
 func DeleteNote(c *fiber.Ctx) error {
-
-	fmt.Println("note_id: ", c.Query("id"))
 
 	request := &deleteNoteRequest{}
 	if err := c.BodyParser(request); err != nil {
