@@ -455,6 +455,9 @@
                 "content": {
                     "type": "string"
                 },
+                "session_id": {
+                    "type": "string"
+                },
                 "title": {
                     "type": "string"
                 }
@@ -500,6 +503,9 @@
             "type": "object",
             "properties": {
                 "content": {
+                    "type": "string"
+                },
+                "session_id": {
                     "type": "string"
                 },
                 "title": {

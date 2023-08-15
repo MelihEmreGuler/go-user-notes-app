@@ -467,6 +467,9 @@ const docTemplate = `{
                 "content": {
                     "type": "string"
                 },
+                "session_id": {
+                    "type": "string"
+                },
                 "title": {
                     "type": "string"
                 }
@@ -512,6 +515,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "content": {
+                    "type": "string"
+                },
+                "session_id": {
                     "type": "string"
                 },
                 "title": {
