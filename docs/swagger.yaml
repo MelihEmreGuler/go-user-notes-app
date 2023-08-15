@@ -17,11 +17,21 @@ definitions:
       username:
         type: string
     type: object
+  handlers.deleteNoteRequest:
+    properties:
+      session_id:
+        type: string
+    type: object
   handlers.signInRequest:
     properties:
       password:
         type: string
       username_or_email:
+        type: string
+    type: object
+  handlers.signOutRequest:
+    properties:
+      session_id:
         type: string
     type: object
   handlers.updateEmailRequest:
@@ -83,6 +93,13 @@ paths:
       consumes:
       - application/json
       description: Sign out the currently logged-in user
+      parameters:
+      - description: User Logout Information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.signOutRequest'
       produces:
       - application/json
       responses:
@@ -138,6 +155,12 @@ paths:
         name: id
         required: true
         type: string
+      - description: Note Information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.deleteNoteRequest'
       produces:
       - application/json
       responses:
@@ -162,6 +185,11 @@ paths:
       - description: Note ID
         in: query
         name: id
+        required: true
+        type: string
+      - description: Session ID
+        in: header
+        name: session_id
         required: true
         type: string
       produces:
@@ -217,6 +245,12 @@ paths:
       consumes:
       - application/json
       description: Get all notes of the user
+      parameters:
+      - description: Session ID
+        in: header
+        name: session_id
+        required: true
+        type: string
       produces:
       - application/json
       responses:

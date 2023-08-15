@@ -71,6 +71,17 @@ const docTemplate = `{
                     "Users"
                 ],
                 "summary": "Sign out a user",
+                "parameters": [
+                    {
+                        "description": "User Logout Information",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.signOutRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -150,6 +161,13 @@ const docTemplate = `{
                         "description": "Note ID",
                         "name": "id",
                         "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Session ID",
+                        "name": "session_id",
+                        "in": "header",
                         "required": true
                     }
                 ],
@@ -236,6 +254,15 @@ const docTemplate = `{
                         "name": "id",
                         "in": "query",
                         "required": true
+                    },
+                    {
+                        "description": "Note Information",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.deleteNoteRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -269,6 +296,15 @@ const docTemplate = `{
                     "Notes"
                 ],
                 "summary": "Get all notes",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session ID",
+                        "name": "session_id",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -489,6 +525,14 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.deleteNoteRequest": {
+            "type": "object",
+            "properties": {
+                "session_id": {
+                    "type": "string"
+                }
+            }
+        },
         "handlers.signInRequest": {
             "type": "object",
             "properties": {
@@ -496,6 +540,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "username_or_email": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.signOutRequest": {
+            "type": "object",
+            "properties": {
+                "session_id": {
                     "type": "string"
                 }
             }
