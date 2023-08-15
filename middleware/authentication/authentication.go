@@ -62,7 +62,8 @@ func SignIn(usernameOrEmail, password string) (*models.User, error) {
 	//checks if the password is correct
 	if checkPassword(password, user.PasswordHash) {
 		fmt.Println("password is correct for user: " + usernameOrEmail)
-		return user, nil // password is correct
+		user.PasswordHash = "" // password is not needed anymore
+		return user, nil       // password is correct
 	} else {
 		return user, errors.New(usernameOrEmail + " password is incorrect")
 	}

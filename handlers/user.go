@@ -103,6 +103,7 @@ func SignIn(c *fiber.Ctx) error {
 		"success":    true, // Add this line to indicate successful login
 		"message":    "User successfully logged in",
 		"session_id": sessionID,
+		"user":       user,
 	})
 }
 
