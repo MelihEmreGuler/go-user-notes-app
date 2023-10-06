@@ -10,9 +10,9 @@ import classNames from "classnames";
 
 export default function Home(){
 
-    const [session_id, setSession_id] = useState(Cookies.get('session_id') ? Cookies.get('session_id') : "");
+    const session_id = (Cookies.get('session_id'));
+    const user = localStorage.getItem("user");
     const [note, setNote] = useState({});
-    const [countNote, setCountNote] = useState(0);
     const navigate = useNavigate();
     const path  = useLocation().pathname;
 
@@ -28,7 +28,6 @@ export default function Home(){
                     return new Date(b.created_at) - new Date(a.created_at);
                 });
                 sortedNotes && setNote(sortedNotes[0]);
-                setCountNote(sortedNotes.length)
             })
             .catch(error => {
                 console.log(error.response)
@@ -50,35 +49,23 @@ export default function Home(){
 
     return(
         <Layout>
-            <main  className="h-screen w-full">
-                <header className="flex justify-between pb-4 pt-8 border-b">
-                    <div className="flex justify-center items-center gap-3">
-                        <Link to="/" className="bg-gray-100 hover:bg-gray-200 transition-colors duration-300 rounded-full p-3 flex items-center justify-center">
-                            <RiArrowLeftLine size={24}/>
-                        </Link>
-                        <small className="font-semibold">
-                            Created at: {dateFormat(note.created_at)}
-                        </small>
-                    </div>
-
-                    <div className="p-2 border-2 border-black rounded-2xl flex justify-center items-center ">
-                         Notes Count: { countNote&&countNote}
-                    </div>
-
-                    <Link to={`/note/${note.note_id}/edit`} className={classNames({
-                            "bg-emerald-500 hover:bg-emerald-600 transition-all duration-300 text-white rounded-full p-3": true,
-                            "bg-blue-500": path === "/edit"
-                    })}>
-                        <RiEdit2Fill size={24}/>
-                    </Link>
+            <main className=" w-full">
+                <header className="flex justify-between pb-4 pt-2 border-b">
+                    <span className="text-xl font-semibold">
+                        Hi {user}! Welcome. Below is the last note you created.
+                    </span>
                 </header>
-                <section className="h-screen pt-10 flex flex-col gap-10">
+                <section className=" pt-10 flex flex-col gap-10">
                     <h1 className="font-bold text-3xl">
                         {note && note.title}
                     </h1>
-                    <div>
-                        {note && note.content}
-                    </div>
+                    <textarea name="" id="" rows={25}
+                              defaultValue={ note ? note.content : ""}
+                              readOnly
+                              className={classNames({
+                                  "p-2 bg-stone-50": true,
+                              })}
+                    ></textarea>
                 </section>
             </main>
         </Layout>

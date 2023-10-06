@@ -32,9 +32,10 @@ export default function Login(){
             }
         })
             .then(response => {
-                Cookies.set('session_id', response.data.session_id, { expires: 1 });
 
                 if (response.data.success === true){
+                    Cookies.set('session_id', response.data.session_id, { expires: 1 });
+                    localStorage.setItem('user', response.data.user.username);
                     toast.success(response.data.message)
                     navigate("/")
                 }

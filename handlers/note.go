@@ -17,9 +17,6 @@ type updateNoteRequest struct {
 	Content   string `json:"content"`
 	SessionID string `json:"session_id"`
 }
-type deleteNoteRequest struct {
-	SessionID string `json:"session_id"`
-}
 
 // checkSession checks if the user is logged in and sets the session information to the context
 func checkSession(c *fiber.Ctx) error {
@@ -186,7 +183,7 @@ func UpdateNote(c *fiber.Ctx) error {
 
 	sess, err := repository.R.SelectSession(sessionID)
 	if err != nil {
-		return fmt.Errorf("error while selecting session: %w", err)
+		return fmt.Errorf("Please login ! -> %w", err)
 	}
 
 	err = repository.R.UpdateNoteByID(sess.UserID, c.Query("id"), request.Title, request.Content)
@@ -213,12 +210,7 @@ func UpdateNote(c *fiber.Ctx) error {
 // @Router /note/:id [delete]
 func DeleteNote(c *fiber.Ctx) error {
 
-	request := &deleteNoteRequest{}
-	if err := c.BodyParser(request); err != nil {
-		return fmt.Errorf("error while parsing request body: %w", err)
-	}
-
-	sessionID := request.SessionID
+	sessionID := c.Get("session_id")
 
 	sess, err := repository.R.SelectSession(sessionID)
 	if err != nil {

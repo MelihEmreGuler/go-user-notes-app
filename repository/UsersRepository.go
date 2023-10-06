@@ -125,7 +125,7 @@ func (repo *Repo) UpdateUserPassword(userId string, hashedPassword string) error
 		return fmt.Errorf("statement execute error while updating user password:" + err.Error())
 	}
 
-	fmt.Println(userId, "password updated")
+	fmt.Println(userId, ", password updated")
 	return nil
 }
 

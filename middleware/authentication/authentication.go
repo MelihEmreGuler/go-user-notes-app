@@ -1,12 +1,11 @@
 package authentication
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"github.com/MelihEmreGuler/go-user-notes-app/models"
 	"github.com/MelihEmreGuler/go-user-notes-app/repository"
+	"golang.org/x/crypto/bcrypt"
 	"strings"
 )
 
@@ -23,7 +22,7 @@ func SignUp(username, email, password string) error {
 	}
 
 	//hashes the password
-	hashedPassword := hashPassword(password)
+	hashedPassword, _ := hashPassword(password)
 
 	//inserts the user to the database
 	return repository.R.InsertUser(username, email, hashedPassword)
@@ -70,7 +69,7 @@ func SignIn(usernameOrEmail, password string) (*models.User, error) {
 }
 
 // UpdatePassword updates the password of the user
-func UpdatePassword(username, oldPassword, newPassword string) error {
+func UpdatePassword(userId, username, oldPassword, newPassword string) error {
 
 	var user *models.User
 	var err error
@@ -91,10 +90,10 @@ func UpdatePassword(username, oldPassword, newPassword string) error {
 		fmt.Println("old password is correct for user: " + username)
 
 		//hashes the new password
-		hashedNewPassword := hashPassword(newPassword)
+		hashedNewPassword, _ := hashPassword(newPassword)
 
 		//updates the password of the user
-		return repository.R.UpdateUserPassword(user.ID, hashedNewPassword)
+		return repository.R.UpdateUserPassword(userId, hashedNewPassword)
 	} else {
 		return errors.New(username + " password is incorrect")
 	}
@@ -102,7 +101,6 @@ func UpdatePassword(username, oldPassword, newPassword string) error {
 
 // UpdateEmail updates the email of the user
 func UpdateEmail(userId, password, newEmail string) error {
-
 	//brings the user from the database
 	user, err := repository.R.SelectUserById(userId)
 	if err != nil {
@@ -124,28 +122,24 @@ func UpdateEmail(userId, password, newEmail string) error {
 		}
 
 		//updates the email of the user
-		return repository.R.UpdateUserEmail(user.ID, newEmail)
+		return repository.R.UpdateUserEmail(userId, newEmail)
 	} else {
 		return errors.New(user.Username + " password is incorrect")
 	}
 }
 
-// hashPassword hashes the password using sha256
-func hashPassword(password string) string {
-	hashed := sha256.Sum256([]byte(password))
-	return hex.EncodeToString(hashed[:])
+func hashPassword(password string) (string, error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return "", err
+	}
+	return string(hashedPassword), nil
 }
 
 // checkPassword checks if the input password is correct
 func checkPassword(inputPassword, storedHashedPassword string) bool {
-	//brings the hashed version of the input password
-	hashedInputPassword := hashPassword(inputPassword)
-
-	//compares the hashed version of the input password with the stored hashed password
-	if hashedInputPassword == storedHashedPassword {
-		return true // password is correct
-	}
-	return false // password is incorrect
+	err := bcrypt.CompareHashAndPassword([]byte(storedHashedPassword), []byte(inputPassword))
+	return err == nil
 }
 
 // usernameValid checks if the username is valid
@@ -174,6 +168,7 @@ func usernameValid(username string) error {
 // emailValid checks if the email is valid
 func emailValid(email string) error {
 	//checks if the email is empty
+
 	if email == "" {
 		return errors.New("email cannot be empty")
 	}

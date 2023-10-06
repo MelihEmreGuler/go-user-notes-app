@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"github.com/MelihEmreGuler/go-user-notes-app/middleware/authentication"
 	"github.com/MelihEmreGuler/go-user-notes-app/middleware/session"
 	"github.com/MelihEmreGuler/go-user-notes-app/models"
@@ -21,10 +22,12 @@ type signInRequest struct {
 type updatePasswordRequest struct {
 	OldPassword string `json:"old_password"`
 	NewPassword string `json:"new_password"`
+	SessionID   string `json:"session_id"`
 }
 type updateEmailRequest struct {
-	Password string `json:"password"`
-	Email    string `json:"email"`
+	Password  string `json:"password"`
+	Email     string `json:"email"`
+	SessionID string `json:"session_id"`
 }
 type signOutRequest struct {
 	SessionID string `json:"session_id"`
@@ -155,10 +158,11 @@ func UpdatePassword(c *fiber.Ctx) error {
 		return err
 	}
 
-	// Get user from session
-	sess, err := session.AuthenticateAndRefresh(c)
+	sessionID := request.SessionID
+
+	sess, err := repository.R.SelectSession(sessionID)
 	if err != nil {
-		return err
+		return fmt.Errorf("error while selecting session: %w", err)
 	}
 
 	user, err := repository.R.SelectUserById(sess.UserID)
@@ -172,7 +176,7 @@ func UpdatePassword(c *fiber.Ctx) error {
 	}
 
 	// Update password
-	if err = authentication.UpdatePassword(user.Username, request.OldPassword, request.NewPassword); err != nil {
+	if err = authentication.UpdatePassword(sess.ID, user.Username, request.OldPassword, request.NewPassword); err != nil {
 		return err
 	}
 
@@ -200,10 +204,11 @@ func UpdateEmail(c *fiber.Ctx) error {
 		return err
 	}
 
-	// Get user from session
-	sess, err := session.AuthenticateAndRefresh(c)
+	sessionID := request.SessionID
+
+	sess, err := repository.R.SelectSession(sessionID)
 	if err != nil {
-		return err
+		return fmt.Errorf("error while selecting session: %w", err)
 	}
 
 	// Update email

@@ -2,12 +2,14 @@
 import { useState, useEffect } from "react";
 import classNames from "classnames";
 import Aside from "../components/Aside.jsx";
-import axios from "axios";
-import {Navigate, useNavigate} from "react-router-dom";
+
 
 
 export default function Layout({ children }){
-    const [offcanvas, setOffcanvas] = useState(0);
+    const [offcanvas, setOffcanvas] = useState(true);
+    const [aside, setAside] = useState(sessionStorage.getItem("aside") !== null ? sessionStorage.getItem("aside"): "false")
+
+
 
     useEffect(() => {
         window.addEventListener('resize', () => {
@@ -19,11 +21,18 @@ export default function Layout({ children }){
 
     return(
         <div className={classNames({
-            "lg:grid grid-cols-5 min-h-screen": true,
-            "overflow-hidden": offcanvas
+            "lg:grid  min-h-screen": true,
+            "overflow-hidden": offcanvas,
+            "grid-cols-12": aside === "true",
+            "grid-cols-5": aside === "false"
         })}>
-            <Aside offcanvas={offcanvas} setOffcanvas={setOffcanvas}/>
-            <main className="col-span-4 p-4 lg:p-8 flex flex-col gap-6 lg:gap-8">
+            <Aside offcanvas={offcanvas} setOffcanvas={setOffcanvas} aside={aside} setAside={setAside}/>
+            <main className={classNames({
+                " p-4 lg:p-8 flex flex-col gap-6 lg:gap-8": true,
+                "col-span-11": aside === "true",
+                "col-span-4": aside === "false"
+
+            })}>
                 { children }
             </main>
         </div>
